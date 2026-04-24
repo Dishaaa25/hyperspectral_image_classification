@@ -1,0 +1,13 @@
+{
+  "accuracy": 0.9996494508062631,
+  "f1": 0.9996493357414107,
+  "kappa": 0.999535503808212,
+  "train_time_s": 3698.131436109543,
+  "inference_time_s": 24.11512017250061,
+  "history_keys": [
+    "accuracy",
+    "loss",
+    "val_accuracy",
+    "val_loss"
+  ]
+}
