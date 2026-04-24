@@ -1,20 +1,3 @@
-"""
-=============================================================================
-SOTA BASELINE MODELS FOR FAIR COMPARISON
-=============================================================================
-Models:
-  1. SpectralFormer (Hong et al., 2021 — IEEE TGRS)
-  2. SwinTransformer adapted for HSI (Liu et al., 2021 — ICCV)
-
-Both trained on the EXACT same data splits as your proposed model
-for a fair apples-to-apples comparison.
-
-Usage:
-  - Import your data prep functions from the main script
-  - Call run_sota_comparison(data_path, gt_path)
-=============================================================================
-"""
-
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models, optimizers
@@ -24,30 +7,12 @@ from sklearn.metrics import accuracy_score, f1_score, cohen_kappa_score, confusi
 import pandas as pd
 import time, os
 
-# If running in same notebook, these are already defined.
-# Otherwise, import from your main script:
-# from reviewer_fixes import (
-#     load_dataset, preprocess_data, apply_pca,
-#     prepare_data, PATCH_SIZE, PCA_COMPONENTS, RESULTS_DIR
-# )
 
 PATCH_SIZE = 15
 PCA_COMPONENTS = 32
 RESULTS_DIR = "reviewer_results"
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
-
-# =============================================================================
-# ██ MODEL 1: SpectralFormer
-# =============================================================================
-# Reference: Hong et al., "SpectralFormer: Rethinking Hyperspectral Image
-# Classification With Transformers," IEEE TGRS, 2021.
-#
-# Key ideas:
-#   - Group-wise spectral embedding (GSE): groups adjacent bands into tokens
-#   - Cross-layer adaptive fusion (CAF): fuses features across transformer layers
-#   - Pure transformer — no CNN spatial branch
-# =============================================================================
 
 class GroupWiseSpectralEmbedding(layers.Layer):
     """
@@ -210,20 +175,6 @@ def build_spectralformer(input_shape, num_classes,
 
     return models.Model(inputs=inputs, outputs=outputs, name="SpectralFormer")
 
-
-# =============================================================================
-# ██ MODEL 2: Swin Transformer for HSI
-# =============================================================================
-# Reference: Liu et al., "Swin Transformer: Hierarchical Vision Transformer
-# using Shifted Windows," ICCV 2021.
-#
-# Adapted for HSI:
-#   - 1D spectral conv for band reduction (like your model)
-#   - Window-based multi-head self-attention (W-MSA)
-#   - Shifted window attention (SW-MSA) for cross-window connections
-#   - Patch merging for hierarchical features
-#   - MLP classification head
-# =============================================================================
 
 class WindowAttention(layers.Layer):
     """
@@ -510,10 +461,6 @@ def train_and_evaluate(model, X_tr, y_tr, X_te, y_te,
     }
 
 
-# =============================================================================
-# ██ COMPARISON RUNNER
-# =============================================================================
-
 def run_sota_comparison(data_path, gt_path, dataset_name="indian_pines"):
     """
     Train and evaluate all three models (Proposed, SpectralFormer, Swin)
@@ -674,11 +621,6 @@ def run_sota_comparison(data_path, gt_path, dataset_name="indian_pines"):
 
     return df, all_results
 
-
-# =============================================================================
-# ██ LOW-LABEL COMPARISON (5%, 10%, 15% — addresses Reviewer 3)
-# =============================================================================
-
 def run_sota_low_label(data_path, gt_path, dataset_name="indian_pines"):
     """
     Compare all models under low-label regimes.
@@ -765,10 +707,6 @@ def run_sota_low_label(data_path, gt_path, dataset_name="indian_pines"):
     print(f"Saved to: {save_path}")
     return df
 
-
-# =============================================================================
-# ██ ENTRY POINT
-# =============================================================================
 
 if __name__ == "__main__":
     # Set your data paths

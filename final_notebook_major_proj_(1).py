@@ -1,15 +1,3 @@
-"""
-=============================================================================
-REVIEWER RESPONSE CODE v2 — All bugs fixed
-=============================================================================
-Fixes applied:
-  - U-Net: Resize layers at EVERY decoder concat (handles odd patch sizes)
-  - PCA: Cast to float64 before fitting to prevent overflow
-  - Matplotlib: Use Agg backend + savefig only (no plt.show() blocking)
-  - Model saving/loading so you don't retrain every time
-=============================================================================
-"""
-
 import matplotlib
 matplotlib.use('Agg')  # <<< FIX: non-interactive backend, no plt.show() hang
 
@@ -123,10 +111,6 @@ def prepare_data(data, labels, patch_size=PATCH_SIZE,
     print(f"  Train: {len(Xtr)}, Test: {len(Xte)}, Classes: {num_classes}")
     return Xtr, to_categorical(ytr, num_classes), Xte, to_categorical(yte, num_classes), label_map
 
-
-# =============================================================================
-# ██ MODEL ARCHITECTURE — U-Net fixed for odd patch sizes
-# =============================================================================
 
 class DynamicResizeLayer(layers.Layer):
     """Resize first tensor to match spatial dims of second tensor."""
@@ -341,10 +325,6 @@ def build_full_model(input_shape, num_classes,
     return models.Model(inputs=inp, outputs=out)
 
 
-# =============================================================================
-# ██ TRAINING, EVALUATION, SAVING/LOADING
-# =============================================================================
-
 def train_and_evaluate(model, X_tr, y_tr, X_te, y_te,
                        epochs=10, batch_size=16, lr=5e-4):
     model.compile(
@@ -437,10 +417,6 @@ def load_saved_model(name):
 
     return model, metrics
 
-
-# =============================================================================
-# ██ COMPLEXITY, NOISE, ROC, VISUALIZATION
-# =============================================================================
 
 def complexity_report(model, input_shape):
     params = model.count_params()
@@ -535,10 +511,6 @@ def run_hyperparameter_table():
     print(hp.to_string(index=False))
     return hp
 
-
-# =============================================================================
-# ██ EXPERIMENT RUNNERS
-# =============================================================================
 
 def run_main_experiment(data_path, gt_path, dataset_name="indian_pines"):
     print(f"\n{'='*60}\n  MAIN EXPERIMENT: {dataset_name}\n{'='*60}")
@@ -701,10 +673,6 @@ def run_statistical_significance(data_path, gt_path, dataset_name="indian_pines"
     return {'full': full_accs, 'base': base_accs, 't': t_stat, 'p': p_val}
 
 
-# =============================================================================
-# ██ MAIN
-# =============================================================================
-
 if __name__ == "__main__":
     # ── SET YOUR PATHS ──
     IP_DATA = "indianpines/indianpinearray.npy"
@@ -714,27 +682,27 @@ if __name__ == "__main__":
     PU_DATA = "pavia/PaviaU.mat"
     PU_GT   = "pavia/PaviaU_gt.mat"
 
-    # # 1. Hyperparameter table (instant)
-    # hp_df = run_hyperparameter_table()
-    #
-    # # 2. Main experiment — trains once, saves model
-    # model, metrics, comp, noise_df, auc_scores = run_main_experiment(IP_DATA, IP_GT)
-    #
-    # # 3. Low-label experiments
-    # low_label_df = run_low_label_experiments(IP_DATA, IP_GT)
+    # 1. Hyperparameter table (instant)
+    hp_df = run_hyperparameter_table()
+ 
+    # 2. Main experiment — trains once, saves model
+    model, metrics, comp, noise_df, auc_scores = run_main_experiment(IP_DATA, IP_GT)
+
+    # 3. Low-label experiments
+    low_label_df = run_low_label_experiments(IP_DATA, IP_GT)
 
     # 4. Ablation study
-    # ablation_df = run_ablation_study(IP_DATA, IP_GT)
+    ablation_df = run_ablation_study(IP_DATA, IP_GT)
 
     # 5. Statistical significance
-    # sig_results = run_statistical_significance(IP_DATA, IP_GT)
+    sig_results = run_statistical_significance(IP_DATA, IP_GT)
 
     # ── Later: reload without retraining ──
     model, metrics = load_saved_model("indian_pines_main")
     print(f"Loaded model accuracy: {metrics.get('accuracy')}")
 
-    # if PU_DATA:
-    #     run_main_experiment(PU_DATA, PU_GT,"pavia_university")
+    if PU_DATA:
+        run_main_experiment(PU_DATA, PU_GT,"pavia_university")
 
     print(f"\n{'='*60}")
     print(f"  ALL DONE — Results in: {RESULTS_DIR}/")
